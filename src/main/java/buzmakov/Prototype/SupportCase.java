@@ -12,16 +12,20 @@ public record SupportCase(
         String type,
 
         @JsonProperty("analysis_layer")
-        @NonNull String analysisLayer,
+        @NonNull
+        String analysisLayer,
 
         @JsonProperty("client_message")
-        @NonNull String clientMessage,
+        @NonNull
+        String clientMessage,
 
         @JsonProperty("support_response")
-        @NonNull String supportResponse,
+        @NonNull
+        String supportResponse,
 
         @JsonProperty("expected_metrics")
-        @NonNull Metrics expectedMetrics,
+        @NonNull
+        Metrics expectedMetrics,
 
         @NonNull
         String recommendation) {
