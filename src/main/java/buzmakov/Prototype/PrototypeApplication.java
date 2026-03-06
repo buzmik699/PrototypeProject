@@ -76,7 +76,7 @@ public class PrototypeApplication implements CommandLineRunner {
 			// ЭТАП 3: Нейросеть (LLM Simulation)
 			log.info("[СЛОЙ 2] Совпадений в базе нет. Запуск семантического анализа...");
 
-			val llmResult = textAnalyzer.simulateLLM(input);
+			val llmResult = textAnalyzer.analyzeWithLlm(input);
 			log.info(llmResult);
 
 			log.info("---------------------------------");
