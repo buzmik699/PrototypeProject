@@ -11,24 +11,25 @@ public record SupportCase(
         @NonNull
         String type,
 
-        @JsonProperty("analysis_layer")
         @NonNull
+        @JsonProperty("analysis_layer")
         String analysisLayer,
 
-        @JsonProperty("client_message")
         @NonNull
+        @JsonProperty("client_message")
         String clientMessage,
 
-        @JsonProperty("support_response")
         @NonNull
+        @JsonProperty("support_response")
         String supportResponse,
 
-        @JsonProperty("expected_metrics")
         @NonNull
+        @JsonProperty("expected_metrics")
         Metrics expectedMetrics,
 
         @NonNull
-        String recommendation) {
+        @JsonProperty("recommendation_id")
+        String recommendationId) {
         @Builder
         public record Metrics(
                 @JsonProperty("aggression_score")

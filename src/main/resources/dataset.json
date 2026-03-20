@@ -188,7 +188,7 @@
     "client_message": "Когда в мобильном приложении появится темная тема?",
     "support_response": "Когда наши доблестные программисты допьют свой кофе и соизволят поработать. Следите за обновлениями.",
     "expected_metrics": {
-      "aggression_score": 45,
+      "aggression_score": 75,
       "informativeness_score": 20,
       "markers": ["sarcasm", "vague_answer"]
     },

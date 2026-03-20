@@ -2,10 +2,9 @@ package buzmakov.Prototype.rules;
 
 import buzmakov.Prototype.AnalysisResult;
 import lombok.NonNull;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-@Slf4j
+
 @Component
 public class CapsLockRule implements AnalysisRule {
     static final double CAPS_DENSITY_THRESHOLD = 0.3;

@@ -13,73 +13,79 @@ import java.util.Scanner;
 @SpringBootApplication
 @RequiredArgsConstructor
 public class PrototypeApplication implements CommandLineRunner {
-	private final TextAnalyzer textAnalyzer;
 
-	public static void main(final String[] args) {
-		SpringApplication.run(PrototypeApplication.class, args);
-	}
+    // Модификатор private подставится из lombok.config
+    final TextAnalyzer textAnalyzer;
 
-	@Override
-	public void run(final String... args) {
-		val scanner = new Scanner(System.in);
+    public static void main(final String[] args) {
+        SpringApplication.run(PrototypeApplication.class, args);
+    }
 
-		if (log.isInfoEnabled()) {
-			log.info("""
+    @Override
+    public void run(final String... args) {
+        val scanner = new Scanner(System.in);
 
-					===============================================
-					>>> СИСТЕМА ГИБРИДНОГО АНАЛИЗА ЗАПУЩЕНА
-					>>> Введите фразу для проверки (или 'exit' для выхода)
-					===============================================""");
-		}
+        if (log.isInfoEnabled()) {
+            log.info("""
 
-		while (true) {
-			System.out.print("\nВведите ответ поддержки: ");
-			val input = scanner.nextLine();
+                ===============================================
+                >>> СИСТЕМА ГИБРИДНОГО АНАЛИЗА ЗАПУЩЕНА
+                >>> Введите ответ поддержки (или 'exit' для выхода)
+                ===============================================""");
+        }
 
-			if (input.equalsIgnoreCase("exit")) {
+        while (true) {
+            System.out.print("\nВвод: ");
+            val input = scanner.nextLine();
 
-				log.info("Завершение работы...");
-				break;
-			}
+            if (input.equalsIgnoreCase("exit")) {
+                log.info("Завершение работы...");
+                break;
+            }
 
-			if (input.isBlank()) {
-				continue;
-			}
+            if (input.isBlank()) {
+                continue;
+            }
 
-			log.info("\n--- ЗАПУСК КАСКАДНОГО АНАЛИЗА ---");
+            log.info("\n--- ЗАПУСК КАСКАДНОГО АНАЛИЗА ---");
 
-			// ЭТАП 1: Быстрые правила (Rule-Based)
-			val rules = textAnalyzer.analyzeRuleBased(input);
+            // ЭТАП 1: Локальный анализ (Правила + Историческая база Kaggle)
+            val rules = textAnalyzer.analyzeRuleBased(input);
 
-			if (log.isInfoEnabled()) {
-				log.info("[СЛОЙ 1] Уровень явной агрессии: {}%", rules.getScore());
-			}
+            if (log.isInfoEnabled()) {
+                log.info("[СЛОЙ 1] Уровень агрессии: {}%", rules.getScore());
+            }
 
-			if (rules.getScore() > 70) {
+            // Если первый слой что-то нашел (мат, капс или совпадение в базе) - выводим отчет
+            if (!rules.getReport().isEmpty()) {
+                log.info("Отчет локального анализа:\n{}", rules.getReport().toString());
+            }
 
-				log.warn(rules.getReport().toString());
-				log.warn(">>> ВЕРДИКТ: БЛОКИРОВКА. Текст нарушает этические нормы.");
-				continue;
-			}
+            // Блокировка при откровенном хамстве (StopWordsRule)
+            if (rules.getScore() > 70) {
+                log.warn(">>> ВЕРДИКТ: БЛОКИРОВКА. Текст грубо нарушает этические нормы.");
+                log.info("---------------------------------");
+                continue;
+            }
 
-			// ЭТАП 2: База знаний (Dataset)
-			val datasetMatch = textAnalyzer.checkDatasetMatch(input);
-			val foundInDataset = !datasetMatch.contains("не найдено");
+            // Если отработал DatasetMatchRule, мы можем не дергать нейросеть
+            // Проверяем по тексту отчета, было ли совпадение с базой
+            boolean foundInDataset = rules.getReport().toString().contains("баз")
+                || rules.getReport().toString().contains("Совпадение");
 
-			if (foundInDataset) {
+            if (foundInDataset) {
+                log.info(">>> ВЕРДИКТ: Категория определена локально по исторической базе. LLM не требуется.");
+                log.info("---------------------------------");
+                continue;
+            }
 
-				log.info("[СЛОЙ 2] Найдено совпадение в архиве кейсов:");
-				log.info(datasetMatch);
-				continue;
-			}
+            // ЭТАП 2: Нейросеть (LLM)
+            log.info("[СЛОЙ 2] Точных совпадений нет. Запуск семантического анализа LLM...");
 
-			// ЭТАП 3: Нейросеть (LLM Simulation)
-			log.info("[СЛОЙ 2] Совпадений в базе нет. Запуск семантического анализа...");
+            val llmResult = textAnalyzer.analyzeWithLlm(input);
+            log.info(llmResult);
 
-			val llmResult = textAnalyzer.analyzeWithLlm(input);
-			log.info(llmResult);
-
-			log.info("---------------------------------");
-		}
-	}
+            log.info("---------------------------------");
+        }
+    }
 }

@@ -1,0 +1,236 @@
+[
+    {
+        "id": 1001,
+        "type": "BUREAUCRACY",
+        "analysis_layer": "Dataset_Kaggle",
+        "client_message": "У меня есть копия подтверждения из вашего главного офиса, хотите, я пришлю её вам, раз ваша база не обновляется?",
+        "support_response": "Нет, спасибо.",
+        "expected_metrics": {
+            "aggression_score": 40,
+            "informativeness_score": 0,
+            "markers": ["сухой отказ", "отсутствие вовлеченности"]
+        },
+        "recommendation_id": "BR-03"
+    },
+    {
+        "id": 1002,
+        "type": "CONDESCENDING",
+        "analysis_layer": "Dataset_Kaggle",
+        "client_message": "Почему ваши данные не совпадают с реальностью в моем регионе?",
+        "support_response": "Наш департамент является частью корпоративного офиса. Если ваш конкретный район перешел на этот формат, мы об этом не знали.",
+        "expected_metrics": {
+            "aggression_score": 35,
+            "informativeness_score": 20,
+            "markers": ["перекладывание ответственности", "дистанцирование"]
+        },
+        "recommendation_id": "CN-02"
+    },
+    {
+        "id": 1003,
+        "type": "PASSIVE_AGGRESSIVE",
+        "analysis_layer": "Dataset_Kaggle",
+        "client_message": "Я уже отправил несколько личных сообщений, и никто не отвечает, как обычно!",
+        "support_response": "Пожалуйста, отправьте нам личное сообщение, чтобы мы могли помочь вам в дальнейшем.",
+        "expected_metrics": {
+            "aggression_score": 60,
+            "informativeness_score": 10,
+            "markers": ["игнорирование контекста", "зацикленный ответ"]
+        },
+        "recommendation_id": "PA-01"
+    },
+    {
+        "id": 1004,
+        "type": "BUREAUCRACY",
+        "analysis_layer": "Dataset_Kaggle",
+        "client_message": "Что еще я могу предоставить? Они отказываются помогать, потому что не могут подтвердить аккаунт, хотя я просто хочу оплатить счет!",
+        "support_response": "Мы не сможем ничего проверить без прохождения процедуры аутентификации вашего аккаунта.",
+        "expected_metrics": {
+            "aggression_score": 45,
+            "informativeness_score": 10,
+            "markers": ["отказ в помощи", "строгий регламент", "игнорирование проблемы"]
+        },
+        "recommendation_id": "BR-03"
+    },
+    {
+        "id": 1005,
+        "type": "CONDESCENDING",
+        "analysis_layer": "Dataset_Kaggle",
+        "client_message": "Информация в этой форме неверна, у меня документ перед глазами. Может, вам стоит обновлять свои данные вовремя?",
+        "support_response": "Информация, касающаяся смены владельца аккаунта, верна. Это должно быть сделано в местном отделении.",
+        "expected_metrics": {
+            "aggression_score": 55,
+            "informativeness_score": 30,
+            "markers": ["настаивание на своей правоте", "скрытый спор с клиентом"]
+        },
+        "recommendation_id": "CN-02"
+    },
+    {
+        "id": 1006,
+        "type": "LOOPING",
+        "analysis_layer": "Dataset_Kaggle",
+        "client_message": "Я пытаюсь оплатить счет уже 60 дней. Сервиса нет, поддержка грубит, меня постоянно переводят на других! Найдите мой аккаунт по серийному номеру оборудования!",
+        "support_response": "Уточните, вы имеете в виду беспроводную связь или домашний интернет?",
+        "expected_metrics": {
+            "aggression_score": 50,
+            "informativeness_score": 5,
+            "markers": ["уточняющий вопрос невпопад", "затягивание времени"]
+        },
+        "recommendation_id": "PR-05"
+    },
+    {
+        "id": 1007,
+        "type": "BUREAUCRACY",
+        "analysis_layer": "Dataset_Kaggle",
+        "client_message": "Я не знаю, что там с роутером, он на другом этаже. Но вай-фай просто отваливается постоянно!",
+        "support_response": "А когда это произошло, лампочки на роутере поменяли цвет?",
+        "expected_metrics": {
+            "aggression_score": 30,
+            "informativeness_score": 5,
+            "markers": ["игнорирование контекста", "следование скрипту вопреки логике"]
+        },
+        "recommendation_id": "BR-03"
+    },
+    {
+        "id": 1008,
+        "type": "PASSIVE_AGGRESSIVE",
+        "analysis_layer": "Dataset_Kaggle",
+        "client_message": "Интернет падает каждые 20 минут, это просто смешно. Вы худший провайдер в моей жизни!",
+        "support_response": "Что же мы такого сделали, что заставило вас так себя чувствовать? Как мы можем наладить наши отношения?",
+        "expected_metrics": {
+            "aggression_score": 65,
+            "informativeness_score": 0,
+            "markers": ["токсичная позитивность", "уход от технической проблемы в эмоции"]
+        },
+        "recommendation_id": "PA-01"
+    },
+    {
+        "id": 1009,
+        "type": "NEUTRAL",
+        "analysis_layer": "Dataset_Kaggle",
+        "client_message": "Ваше приложение вообще не открывается, почините его уже!",
+        "support_response": "Приношу извинения за неудобства. О каком именно приложении идет речь? Я с радостью помогу вам во всем разобраться.",
+        "expected_metrics": {
+            "aggression_score": 0,
+            "informativeness_score": 80,
+            "markers": ["вежливое уточнение", "конструктив"]
+        },
+        "recommendation_id": "OK-00"
+    },
+    {
+        "id": 1010,
+        "type": "CONDESCENDING",
+        "analysis_layer": "Dataset_Kaggle",
+        "client_message": "Могу ли я просто прийти в своем обычном виде и всё равно получить скидку по акции?",
+        "support_response": "Ну, вы попробуйте.",
+        "expected_metrics": {
+            "aggression_score": 30,
+            "informativeness_score": 0,
+            "markers": ["небрежный ответ", "отсутствие конкретики", "ленивая поддержка"]
+        },
+        "recommendation_id": "CN-02"
+    },
+    {
+        "id": 1011,
+        "type": "BUREAUCRACY",
+        "analysis_layer": "Dataset_Kaggle",
+        "client_message": "Когда уже будут новости о бесплатных играх месяца? Можно мне уже помочь наконец?",
+        "support_response": "На данный момент информации нет. Вы можете самостоятельно следить за обновлениями в нашем блоге по ссылке.",
+        "expected_metrics": {
+            "aggression_score": 25,
+            "informativeness_score": 10,
+            "markers": ["стандартная отписка", "посыл на внешний ресурс"]
+        },
+        "recommendation_id": "BR-03"
+    },
+    {
+        "id": 1012,
+        "type": "HIDDEN_SARCASM",
+        "analysis_layer": "Dataset_Kaggle",
+        "client_message": "Вы серьезно упаковываете авокадо в столько слоев пластика? Это действительно необходимо?",
+        "support_response": "Мы передали вашей команде, что можем работать лучше. Спасибо, что поделились! :)",
+        "expected_metrics": {
+            "aggression_score": 50,
+            "informativeness_score": 0,
+            "markers": ["токсичный смайлик", "обесценивание жалобы", "скрытый сарказм"]
+        },
+        "recommendation_id": "SR-04"
+    },
+    {
+        "id": 1013,
+        "type": "BUREAUCRACY",
+        "analysis_layer": "Dataset_Kaggle",
+        "client_message": "Почему вы берете плату за пакет для мяса? По закону вы обязаны предоставлять его бесплатно. Ужасный сервис!",
+        "support_response": "Поскольку наша упаковка является достаточной, любые дополнительные обертки или пакеты требуют оплаты в 5 пенсов согласно законодательству. Спасибо.",
+        "expected_metrics": {
+            "aggression_score": 40,
+            "informativeness_score": 10,
+            "markers": ["ссылка на закон без сочувствия", "сухой отказ", "формальная благодарность в конце спора"]
+        },
+        "recommendation_id": "BR-03"
+    },
+    {
+        "id": 1014,
+        "type": "BUREAUCRACY",
+        "analysis_layer": "Dataset_Kaggle",
+        "client_message": "Я могу всё еще предзаказать игру на PS4 в вашем магазине?",
+        "support_response": "Да, вы можете это сделать. Для получения более подробной информации, пожалуйста, свяжитесь с магазином вашей консоли.",
+        "expected_metrics": {
+            "aggression_score": 20,
+            "informativeness_score": 5,
+            "markers": ["перевод на другую поддержку", "отсутствие желания помочь самому"]
+        },
+        "recommendation_id": "BR-03"
+    },
+    {
+        "id": 1015,
+        "type": "NEUTRAL",
+        "analysis_layer": "Dataset_Kaggle",
+        "client_message": "Похоже, это видео удалили. Просто хотел дать вам знать :)",
+        "support_response": "Похоже, оно действительно было удалено. Спасибо, что сообщили мне! :)",
+        "expected_metrics": {
+            "aggression_score": 0,
+            "informativeness_score": 50,
+            "markers": ["зеркальный ответ", "вежливое завершение"]
+        },
+        "recommendation_id": "OK-00"
+    },
+    {
+        "id": 1016,
+        "type": "BUREAUCRACY",
+        "analysis_layer": "Dataset_Kaggle",
+        "client_message": "Я перепробовал все ваши методы сброса настроек, переустанавливал приложение — ничего не помогает. Когда вы решите проблему?",
+        "support_response": "Спасибо за подтверждение. Мы подключаем эксперта, который сможет вам помочь. Он ответит, как только освободится.",
+        "expected_metrics": {
+            "aggression_score": 30,
+            "informativeness_score": 5,
+            "markers": ["перекладывание на другого специалиста", "неопределенный срок ожидания"]
+        },
+        "recommendation_id": "PR-05"
+    },
+    {
+        "id": 1017,
+        "type": "CONDESCENDING",
+        "analysis_layer": "Dataset_Kaggle",
+        "client_message": "Метод зажатия клавиш при загрузке не сработал. Перетаскивание изображения больше не работает как раньше.",
+        "support_response": "Жаль, что этот процесс не кажется вам достаточно простым... дайте нам знать, помогло ли видео.",
+        "expected_metrics": {
+            "aggression_score": 40,
+            "informativeness_score": 10,
+            "markers": ["скрытая ирония", "оценка когнитивных способностей клиента"]
+        },
+        "recommendation_id": "CN-02"
+    },
+    {
+        "id": 1018,
+        "type": "BUREAUCRACY",
+        "analysis_layer": "Dataset_Kaggle",
+        "client_message": "Будет ли обновление для старой версии игры под новую iOS или нет?",
+        "support_response": "К сожалению, у нас нет информации по этому поводу. Пожалуйста, следите за обновлениями. Искренние извинения.",
+        "expected_metrics": {
+            "aggression_score": 20,
+            "informativeness_score": 0,
+            "markers": ["отсутствие информации", "вежливый тупик"]
+        },
+        "recommendation_id": "BR-03"
+    }
+]

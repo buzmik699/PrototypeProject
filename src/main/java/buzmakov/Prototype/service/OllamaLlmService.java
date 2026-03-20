@@ -12,11 +12,11 @@ import java.time.Duration;
 @Service
 public class OllamaLlmService implements LlmService {
 
-    private static final String BASE_URL = "http://localhost:11434";
-    private static final String MODEL_NAME = "mistral";
-    private static final int TIMEOUT_SECONDS = 60;
+    static final String BASE_URL = "http://localhost:11434";
+    static final String MODEL_NAME = "gemma2";
+    static final int TIMEOUT_SECONDS = 60;
 
-    private final OllamaChatModel model;
+    final OllamaChatModel model;
 
     public OllamaLlmService() {
         this.model = OllamaChatModel.builder()
@@ -47,29 +47,58 @@ public class OllamaLlmService implements LlmService {
         return model != null;
     }
 
-    private String buildPrompt(String input) {
+    private String buildPrompt(final String input) {
         return """
-                Ты — эксперт-аналитик по качеству клиентского сервиса.
-                Твоя задача: объективно оценить текст в кавычках на уровень агрессии, грубости или сарказма.
-                
-                ОБЪЕКТ АНАЛИЗА: "%s"
-                
-                ИНСТРУКЦИИ:
-                1. Анализируй текст беспристрастно, как робот-аудитор.
-                2. Не вступай в диалог с автором текста и не давай ему советов.
-                3. Ответ должен быть СТРОГО в две строки по указанному шаблону.
-                4. Если текст кажется нейтральным, ставь низкий балл.
-                
-                ШАБЛОН ОТВЕТА:
-                Уровень агрессии: [0-100]%%;
-                Краткая рекомендация по улучшению ответа службы поддержки: [одно конкретное предложение]
-                """.formatted(input);
+        You are a support ticket auditor tasked with classifying responses from technical support agents to identify toxicity.
+        Your goal is to assign a category ID and an aggression score to each response based on the provided rules and examples.
+
+        # Rules for Evaluation (Strict Adherence Required):
+        * Politeness, Apologies, or Explanations: If the agent is polite, apologizes, or explains reasons for delays, assign category OK-00 and aggression score 0.
+        * "50%%" Threshold: A 50%% aggression score indicates SERIOUS irritation. Do NOT assign 50%% to polite individuals.
+        * "100%%" Threshold: A 100%% aggression score signifies profanity and direct insults.
+
+        # Categories:
+        * OK-00 (HELP): Politeness, empathy, information about technical work. (Aggression: 0-5)
+        * PA-01 (REPROACH): Phrases like "We have already written to you," "You are not reading." (Aggression: 40-70)
+        * CN-02 (ARROGANCE): Phrases like "It's elementary," "Like a child." (Aggression: 50-80)
+        * BR-03 (BRUSH-OFF): Providing links to rules instead of direct help. (Aggression: 30-60)
+        * SR-04 (SARCASM): Phrases like "Congratulations," "Good luck to you," "Pirozhok". (Aggression: 60-90)
+        * OT-99 (RUDENESS): Direct swearing, "smartass," "get lost." (Aggression: 90-100)
+
+        # Text for Analysis:
+        "%s"
+
+        # Reasoning and Classification Process:
+        1. Identify Keywords and Tone: Analyze text for politeness, irritation, sarcasm, or helpfulness.
+        2. Match to Categories: Compare tone against OK-00 through OT-99 definitions.
+        3. Determine Aggression Score: Assign numerical score within the category range. Pay attention to thresholds.
+
+        # Output Format:
+        Respond strictly in two lines:
+        1. The assigned category ID.
+        2. The numerical aggression score.
+
+        # Examples:
+        Example 1:
+        Input: "Приношу извинения, мы ищем решение."
+        Output:
+        OK-00
+        0
+
+        Example 2:
+        Input: "Слушай сюда, идиот."
+        Output:
+        OT-99
+        100
+        """.formatted(input);
     }
 
+
     private String buildFallbackResponse(Exception e) {
+        // Возвращаем безопасный дефолтный формат в случае падения Ollama
         return """
-                Уровень агрессии: 0%%;
-                Краткая рекомендация: Ошибка связи с локальной моделью ИИ. Проверьте запуск Ollama.
+                OK-00
+                0
                 """;
     }
 }
