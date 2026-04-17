@@ -4,7 +4,8 @@ import buzmakov.Prototype.AnalysisResult;
 import lombok.NonNull;
 
 public interface AnalysisRule {
-    void apply(@NonNull String input,
-               @NonNull AnalysisResult result);
+
+    void apply(@NonNull final String input, @NonNull final AnalysisResult result);
+
     String getName();
 }

@@ -5,8 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.NonNull;
 
-@Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Builder
 public record Recommendation(
 
     @NonNull
@@ -19,5 +19,6 @@ public record Recommendation(
 
     @NonNull
     @JsonProperty("advice")
-    String advice
-) {}
+    String advice) {
+
+}

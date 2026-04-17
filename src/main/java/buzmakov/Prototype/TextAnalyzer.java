@@ -1,33 +1,37 @@
 package buzmakov.Prototype;
 
-
 import buzmakov.Prototype.rules.AnalysisRule;
+import buzmakov.Prototype.service.FeedbackService;
 import buzmakov.Prototype.service.LlmService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import lombok.val;
-import org.springframework.stereotype.Component;
-
 import jakarta.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@FieldDefaults(makeFinal = true)
 public class TextAnalyzer {
 
     @NonNull
-    final List<AnalysisRule> analysisRules;
+    List<AnalysisRule> analysisRules;
 
     @NonNull
-    final LlmService llmService;
+    LlmService llmService;
 
-    final Map<String, Recommendation> recommendationLibrary = new HashMap<>();
+    Map<String, Recommendation> recommendationLibrary = new HashMap<>();
+
+    FeedbackService feedbackService;
 
     @PostConstruct
     public void init() throws Exception {
@@ -35,15 +39,21 @@ public class TextAnalyzer {
     }
 
     private void loadRecommendations() throws Exception {
-        try (val is = getClass().getResourceAsStream("/recommendations.json")) {
-            if (is == null) {
+        try (val inputStream = getClass().getResourceAsStream("/recommendations.json")) {
+            if (inputStream == null) {
                 log.warn(">>> Файл recommendations.json не найден. Будут использованы базовые советы.");
                 return;
             }
+
             val mapper = new ObjectMapper();
-            val loaded = mapper.readValue(is, new TypeReference<Map<String, Recommendation>>() {});
+            val loaded = mapper.readValue(inputStream, new TypeReference<Map<String, Recommendation>>() {
+            });
+
             recommendationLibrary.putAll(loaded);
-            log.info(">>> Справочник рекомендаций загружен: {} категорий", recommendationLibrary.size());
+
+            if (log.isInfoEnabled()) {
+                log.info(">>> Справочник рекомендаций загружен: {} категорий", recommendationLibrary.size());
+            }
         } catch (Exception thrown) {
             log.error("Ошибка при чтении recommendations.json: {}", thrown.getMessage());
             throw thrown;
@@ -53,72 +63,94 @@ public class TextAnalyzer {
     public AnalysisResult analyzeRuleBased(final String input) {
         val result = new AnalysisResult();
 
-        for (AnalysisRule rule : analysisRules) {
+        analysisRules.forEach(rule -> {
             try {
                 rule.apply(input, result);
-            } catch (Exception e) {
-                log.error("Ошибка в правиле {}: {}", rule.getName(), e.getMessage());
+            } catch (Exception thrown) {
+                log.error("Ошибка в правиле {}: {}", rule.getName(), thrown.getMessage());
             }
-        }
+        });
+
         return result;
     }
 
-    public String analyzeWithLlm(final String input) {
-        if (!llmService.isAvailable()) {
-            log.warn("LLM-сервис недоступен, возвращаем fallback-ответ");
-            return buildFallbackResponse();
+    public record LlmResult(
+        String categoryId,
+        int score,
+        String formattedResponse
+    ) {}
+
+    public LlmResult analyzeWithLlm(final String input) {
+        val manualMatch = feedbackService.findMatch(input);
+
+        if (manualMatch.isPresent()) {
+            val feedback = manualMatch.get();
+            log.info(">>> Используется ручная коррекция");
+
+            return new LlmResult(
+                feedback.category(),
+                feedback.score(),
+                formatFinalResponse(feedback.category(), feedback.score())
+            );
         }
 
-        String rawLlmResponse = llmService.analyzeAggression(input);
+        if (!llmService.isAvailable()) {
+            log.warn("LLM-сервис недоступен, возвращаем fallback-ответ");
+            return new LlmResult("OK-00", 0, buildFallbackResponse());
+        }
+
+        val rawLlmResponse = llmService.analyzeAggression(input);
         return parseLlmResponse(rawLlmResponse);
     }
 
-    private String parseLlmResponse(String rawResponse) {
+    private LlmResult parseLlmResponse(final String rawResponse) {
         try {
-            // убираем лишние пробелы и пустые строки
-            List<String> lines = rawResponse.trim().lines()
+            val lines = rawResponse.trim()
+                .lines()
                 .map(String::trim)
-                .filter(s -> !s.isEmpty())
+                .filter(StringUtils::isNotBlank)
                 .toList();
 
-            if (lines.isEmpty()) return formatFinalResponse("OT-99", 50);
+            if (lines.isEmpty()) {
+                return new LlmResult("OT-99", 50, formatFinalResponse("OT-99", 50));
+            }
 
-            // ищем строку, похожую на ID категории (две буквы, дефис, две цифры)
-            String categoryId = lines.stream()
-                .filter(s -> s.matches(".*[A-Z]{2}-\\d{2}.*"))
+            val categoryId = lines.stream()
+                .filter(line -> line.matches(".*[A-Z]{2}-\\d{2}.*"))
                 .findFirst()
-                .map(s -> s.replaceAll(".*([A-Z]{2}-\\d{2}).*", "$1"))
+                .map(line -> line.replaceAll(".*([A-Z]{2}-\\d{2}).*", "$1"))
                 .orElse("OT-99");
 
-            // ищем строку, содержащую только цифры (score)
             int score = lines.stream()
-                .filter(s -> s.matches("\\d+"))
+                .filter(line -> line.matches("\\d+"))
                 .map(Integer::parseInt)
                 .findFirst()
                 .orElse(50);
 
-            return formatFinalResponse(categoryId, score);
-        } catch (Exception e) {
-            log.error("Ошибка парсинга: {}", rawResponse);
-            return formatFinalResponse("OT-99", 50);
+            return new LlmResult(categoryId, score, formatFinalResponse(categoryId, score));
+        } catch (Exception thrown) {
+            log.error("Ошибка парсинга ответа LLM: {}", rawResponse);
+            return new LlmResult("OT-99", 50, formatFinalResponse("OT-99", 50));
         }
     }
 
-    private String formatFinalResponse(String categoryId, int score) {
-        Recommendation rec = recommendationLibrary.getOrDefault(categoryId,
-            recommendationLibrary.get("OT-99"));
+    private String formatFinalResponse(final String categoryId, final int score) {
+        val recommendation = recommendationLibrary.getOrDefault(
+            categoryId,
+            recommendationLibrary.get("OT-99")
+        );
 
         return """
                 [АНАЛИЗ ИИ]
                 Уровень агрессии: %d%%
                 Категория: %s (%s)
                 Рекомендация: %s
-                """.formatted(score, categoryId, rec.title(), rec.advice());
+                """.formatted(score, categoryId, recommendation.title(), recommendation.advice());
     }
 
     private String buildFallbackResponse() {
         return """
-                Уровень агрессии: 0%%;
+                Уровень агрессии: 0%;
                 Краткая рекомендация: LLM-сервис временно недоступен.
                 """;
     }

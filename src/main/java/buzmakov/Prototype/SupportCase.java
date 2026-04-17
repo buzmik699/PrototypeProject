@@ -6,39 +6,41 @@ import lombok.NonNull;
 
 @Builder
 public record SupportCase(
-        int id,
+    int id,
+
+    @NonNull
+    String type,
+
+    @NonNull
+    @JsonProperty("analysis_layer")
+    String analysisLayer,
+
+    @NonNull
+    @JsonProperty("client_message")
+    String clientMessage,
+
+    @NonNull
+    @JsonProperty("support_response")
+    String supportResponse,
+
+    @NonNull
+    @JsonProperty("expected_metrics")
+    Metrics expectedMetrics,
+
+    @NonNull
+    @JsonProperty("recommendation_id")
+    String recommendationId) {
+
+    @Builder
+    public record Metrics(
+        @JsonProperty("aggression_score")
+        int aggressionScore,
+
+        @JsonProperty("informativeness_score")
+        int informativenessScore,
 
         @NonNull
-        String type,
+        String[] markers) {
 
-        @NonNull
-        @JsonProperty("analysis_layer")
-        String analysisLayer,
-
-        @NonNull
-        @JsonProperty("client_message")
-        String clientMessage,
-
-        @NonNull
-        @JsonProperty("support_response")
-        String supportResponse,
-
-        @NonNull
-        @JsonProperty("expected_metrics")
-        Metrics expectedMetrics,
-
-        @NonNull
-        @JsonProperty("recommendation_id")
-        String recommendationId) {
-        @Builder
-        public record Metrics(
-                @JsonProperty("aggression_score")
-                int aggressionScore,
-
-                @JsonProperty("informativeness_score")
-                int informativenessScore,
-
-                @NonNull
-                String[] markers) {
-        }
+    }
 }
