@@ -1,5 +1,6 @@
 package buzmakov.Prototype.service;
 
+import buzmakov.Prototype.model.AuthorRole;
 import dev.langchain4j.model.ollama.OllamaChatModel;
 import java.time.Duration;
 import lombok.NonNull;
@@ -15,9 +16,7 @@ import org.springframework.stereotype.Service;
 public class OllamaLlmService implements LlmService {
 
     static String BASE_URL = "http://localhost:11434";
-
     static String MODEL_NAME = "gemma2";
-
     static int TIMEOUT_SECONDS = 60;
 
     OllamaChatModel model;
@@ -37,16 +36,16 @@ public class OllamaLlmService implements LlmService {
 
     @NotNull
     @Override
-    public String analyzeAggression(@NonNull final String input) {
-        val prompt = buildPrompt(input);
+    public String analyzeAggression(@NonNull final String input, @NonNull final AuthorRole role) {
+        val prompt = buildPrompt(input, role);
 
         try {
             if (log.isDebugEnabled()) {
-                log.debug(">>> Запрос к LLM (длина запроса: {} симв.)", prompt.length());
+                log.debug(">>> Запрос к LLM (Роль: {}, длина: {} симв.)", role.name(), prompt.length());
             }
 
             return model.generate(prompt);
-        } catch (Exception thrown) {
+        } catch (final Exception thrown) {
             log.error("Ошибка при работе с LLM: {}", thrown.getMessage());
             return buildFallbackResponse(thrown);
         }
@@ -57,7 +56,15 @@ public class OllamaLlmService implements LlmService {
         return model != null;
     }
 
-    private String buildPrompt(final String input) {
+    private String buildPrompt(final String input, final AuthorRole role) {
+        if (role == AuthorRole.CLIENT) {
+            return buildClientPrompt(input);
+        }
+
+        return buildSupportPrompt(input);
+    }
+
+    private String buildSupportPrompt(final String input) {
         return """
                 You are a support ticket auditor tasked with classifying responses from technical support agents to identify toxicity.
                 Your goal is to assign a category ID and an aggression score to each response based on the provided rules and examples.
@@ -79,11 +86,6 @@ public class OllamaLlmService implements LlmService {
                 # Text for Analysis:
                 "%s"
 
-                # Reasoning and Classification Process:
-                1. Identify Keywords and Tone: Analyze text for politeness, irritation, sarcasm, or helpfulness.
-                2. Match to Categories: Compare tone against OK-00 through OT-99 definitions.
-                3. Determine Aggression Score: Assign numerical score within the category range. Pay attention to thresholds.
-
                 # Output Format:
                 Respond strictly in two lines:
                 1. The assigned category ID.
@@ -97,16 +99,57 @@ public class OllamaLlmService implements LlmService {
                 0
 
                 Example 2:
-                Input: "Ждите, я занят, не пишите мне каждую минуту."
+                Input: "Ждите, я занят."
                 Output:
                 PR-05
                 65
+                """.formatted(input);
+    }
+
+    private String buildClientPrompt(final String input) {
+        return """
+                You are an AI assistant tasked with classifying customer messages to protect support agents from toxicity and prioritize critical issues.
+                Your goal is to assign a category ID and an aggression score to each customer message based on the provided rules.
+
+                # Rules for Evaluation:
+                * Neutral/Constructive: If the client is just reporting a problem without insults, assign OK-00 and score 0-20.
+                * High Threat: Mentions of lawsuits, firing, or extreme profanity should score very high (80-100).
+                * Output Format: STRICTLY two lines. Line 1: Category ID. Line 2: Numerical score.
+
+                # Categories:
+                * OK-00 (NEUTRAL): Constructive problem description, calm tone. (Aggression: 0-20)
+                * AG-01 (AGGRESSION): Profanity, direct insults ("stupid", "idiots"). (Aggression: 80-100)
+                * TH-02 (THREATS): Mentions of lawsuits, firing, complaining to management. (Aggression: 70-100)
+                * SR-03 (SARCASM): Ironic remarks, "geniuses", "bravo". (Aggression: 40-70)
+                * UN-04 (EMOTIONAL): Emotional outbursts without technical details, high frustration. (Aggression: 30-60)
+                * PR-05 (PRESSURE): "Fix it in an hour", "Why are you silent?!", spamming. (Aggression: 50-80)
+
+                # Text for Analysis:
+                "%s"
+
+                # Output Format:
+                Respond strictly in two lines:
+                1. The assigned category ID.
+                2. The numerical aggression score.
+
+                # Examples:
+                Example 1:
+                Input: "У меня не работает кнопка оплаты, помогите пожалуйста."
+                Output:
+                OK-00
+                0
+
+                Example 2:
+                Input: "Если не почините за час, я пишу заявление в прокуратуру!"
+                Output:
+                TH-02
+                85
 
                 Example 3:
-                Input: "Слушай сюда, идиот."
+                Input: "Вы там вообще чем-то занимаетесь, криворукие?"
                 Output:
-                OT-99
-                100
+                AG-01
+                90
                 """.formatted(input);
     }
 

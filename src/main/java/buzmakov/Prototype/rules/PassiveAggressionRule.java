@@ -10,7 +10,6 @@ public class PassiveAggressionRule implements AnalysisRule {
 
     @Override
     public void apply(@NonNull final String input, @NonNull final AnalysisResult result) {
-        // Используем StringUtils для удаления ведущих пробелов согласно стандартам
         if (StringUtils.stripStart(input, null).startsWith("...")) {
             result.addPenalty(30, "Пассивная агрессия: многоточие в начале фразы");
         }

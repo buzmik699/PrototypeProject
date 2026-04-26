@@ -1,11 +1,12 @@
 package buzmakov.Prototype.service;
 
+import buzmakov.Prototype.model.AuthorRole;
 import lombok.NonNull;
 
 public interface LlmService {
 
     @NonNull
-    String analyzeAggression(@NonNull final String input);
+    String analyzeAggression(String input, AuthorRole role);
 
     boolean isAvailable();
 }

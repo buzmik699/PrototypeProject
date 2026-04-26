@@ -12,6 +12,12 @@ public class AnalysisResult {
     @NonFinal
     int score;
 
+    @NonFinal
+    String category = "OK-00";
+
+    @NonFinal
+    String recommendation = "";
+
     @NonNull
     StringBuilder report;
 
@@ -22,12 +28,7 @@ public class AnalysisResult {
 
     public void addPenalty(final int points, final String reason) {
         this.score += points;
-
-        this.report.append("- [")
-            .append(points)
-            .append("%] ")
-            .append(reason)
-            .append("\n");
+        this.report.append("- [%d%%] %s\n".formatted(points, reason));
 
         if (this.score > 100) {
             this.score = 100;
