@@ -1,5 +1,6 @@
 package buzmakov.Prototype;
 
+import buzmakov.Prototype.model.AuthorRole;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -42,7 +43,7 @@ class AggressionBenchmarkTest {
 
         val correctPredictions = cases.stream()
             .filter(testCase -> {
-                val result = service.analyzeWithLlm(testCase.text());
+                val result = service.analyzeWithLlm(testCase.text(), AuthorRole.SUPPORT);
 
                 val isCategoryCorrect = result.categoryId().equals(testCase.expectedCategory());
                 val scoreDiff = Math.abs(result.score() - testCase.expectedAggression());
